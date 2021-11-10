@@ -1134,7 +1134,8 @@ private partitionDisarmed(){
 
 		if (location.hsmStatus != "disarmed")
 		{
-            //log.info "partitionDisarmed: location.hsmStatus= $location.hsmStatus setting hsmSetArm=disarm"
+            // Disarm HSM when system disarms
+            log.info "partitionDisarmed: location.hsmStatus= $location.hsmStatus setting hsmSetArm=disarm"
 			sendLocationEvent(name: "hsmSetArm", value: "disarm"); ifDebug("sendLocationEvent(name:\"hsmSetArm\", value:\"disarm\")")
 		}
 	}
@@ -1187,6 +1188,8 @@ private parseUser(message){
 
 	send_Event(name:"LastUsedCodePosition", value: userPosition)
 
+    if (!device.currentValue("Codes")) return userPosition
+    
 	def storedCodes = new groovy.json.JsonSlurper().parseText(device.currentValue("Codes"))
 	assert storedCodes instanceof Map
 
@@ -1250,6 +1253,8 @@ private systemArmed(){
 
 		if (location.hsmStatus != "armedAway")
 		{
+            // Arm HSM when system arms away
+            log.info "partitionArmed: location.hsmStatus= $location.hsmStatus setting hsmSetArm=disarm"
 			sendLocationEvent(name: "hsmSetArm", value: "armAway"); ifDebug("sendLocationEvent(name:\"hsmSetArm\", value:\"armAway\")")
 		}
 	}
@@ -1265,8 +1270,10 @@ private systemArmedHome(){
 
 		if (location.hsmStatus != "armedHome")
 		{
-            //log.info "systemArmedHome() hsmStatus=$location.hsmStatus  setting hsmSetArm=armHome"
-			sendLocationEvent(name: "hsmSetArm", value: "armHome"); ifDebug("sendLocationEvent(name:\"hsmSetArm\", value:\"armHome\")")
+            log.info "systemArmedHome() hsmStatus=$location.hsmStatus  setting hsmSetArm=armHome"
+			//sendLocationEvent(name: "hsmSetArm", value: "armHome"); ifDebug("sendLocationEvent(name:\"hsmSetArm\", value:\"armHome\")")
+            // NOTE(rvrolyk): Not using home only night
+			sendLocationEvent(name: "hsmSetArm", value: "armNight"); ifDebug("sendLocationEvent(name:\"hsmSetArm\", value:\"armNight\")")
 		}
 	}
 }
@@ -1281,6 +1288,7 @@ private systemArmedNight(){
 
 		if (location.hsmStatus != "armedNight")
 		{
+            log.info "systemArmedNight() hsmStatus=$location.hsmStatus  setting hsmSetArm=armHome"
 			sendLocationEvent(name: "hsmSetArm", value: "armNight"); ifDebug("sendLocationEvent(name:\"hsmSetArm\", value:\"armNight\")")
 		}
 	}
@@ -1510,7 +1518,7 @@ private send_Event(evnt) {
 	21: "API Command Partition Error (Requested Partition is out of bounds)",
 	22: "API Command Not Supported",
 	23: "API System Not Armed (sent in response to a disarm command)",
-	24: "API System Not Ready to Arm (system is either not-secure, in exit-delay, or already armed",
+	24: "API System Not Ready to Arm (system is either not-secure, in exit-delay, or already armed)",
 	25: "API Command Invalid Length 26 API User Code not Required",
 	26: "API User Code not Required",
 	27: "API Invalid Characters in Command (no alpha characters are allowed except for checksum"
@@ -2226,3 +2234,5 @@ Version: 0.11.0
 *		Error Codes
 *
 */
+
+

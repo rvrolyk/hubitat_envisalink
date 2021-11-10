@@ -117,6 +117,8 @@ def mainPage() {
                 section("<h1>Safety Monitor</h1>") {
                     paragraph "Enabling Hubitat Safety Monitor Integration will tie your Envisalink state to the state of HSM.  Your Envisalink will receive the Arm Away, Arm Home and Disarm commands based on the HSM state. "
                         input "enableHSM", "bool", title: "Enable HSM Integration", required: false, multiple: false, defaultValue: false, submitOnChange: true
+                        input "switchForHSM", "capability.switch", title: "Switch to control HSM integration", required: false, multiple: false, submitOnChange: true
+                        input name: "modesForHSM", type: "mode", title: "Modes for HSM integration", multiple: true, submitOnChange: true
                }
 
 			 section("<br/><br/>") {
@@ -558,6 +560,14 @@ def hsmHandler(evt) {
     //the call below appears unnecessary and causes it to throw a quick disarm hsm event during armHome/armAway events. 
 	//sendEvent(name: "HSM Event", value: evt.value)
     if (evt.value == state.lastHSMEvent) return
+
+    // If the control switch is on **or** if the mode is valid, we want to proceed, otherwise do nothing.
+    def enableHSM = false
+    if (switchForHSM && switchForHSM.currentValue("switch") == "on") enableHSM = true
+    if (!enableHSM && modesForHSM && modesForHSM.contains(location.mode) || modesForHSM.size() == 0) enableHSM = true
+    if (!enableHSM) return
+  //  log.debug "Controlling alarm with HSM"
+   // return 
 	state.lastHSMEvent = evt.value
 
 	def lock
@@ -582,19 +592,20 @@ def hsmHandler(evt) {
                                 //log.info "HSM Sending evt.value=armedAway: getEnvisalinkDevice status=${myStatus}"
 							break
 							case "armedHome":
+                            case "armedNight": // Edit rvrolyk: our DSC doesn't have any night zones so just use home to avoid blinky red light
 								ifDebug("Sending Arm Home")
 								speakArmingHome()
 								getEnvisalinkDevice().ArmHome()
                                 //myStatus = getEnvisalinkDevice().currentValue("Status")
                                 //log.info "HSM Sending evt.value=armedHome: getEnvisalinkDevice status=${myStatus}"
 							break
-							case "armedNight":
+							/*case "armedNight":
 								ifDebug("Sending Arm Night")
 								speakArmingNight()
 								getEnvisalinkDevice().ArmNight()
                                 //myStatus = getEnvisalinkDevice().currentValue("Status")
                                 //log.info "ENVIS HSM Arming Night: Status: ${myStatus}"
-							break
+							break*/
 						}
 					}
 				}
@@ -992,3 +1003,5 @@ def uninstalled() {
 *		Creates the Envisalink Connection device and allows definition of Zone Maps, creating virtual contact sensors as child components.
 *		Allows subscription to HSM to mirror the state of HSM to Envisalink (ArmAway, ArmHome, Disarm)
 */
+
+
