@@ -668,7 +668,7 @@ def parse(String message) {
 		}
 
 		if(tpiResponses[message.take(3) as int] == USEROPENING){
-			partitionArmedNight()
+			//partitionArmedNight()
             parseUser(message)
 		}
 
@@ -1272,7 +1272,7 @@ private systemArmedHome(){
 		{
             log.info "systemArmedHome() hsmStatus=$location.hsmStatus  setting hsmSetArm=armHome"
 			//sendLocationEvent(name: "hsmSetArm", value: "armHome"); ifDebug("sendLocationEvent(name:\"hsmSetArm\", value:\"armHome\")")
-            // NOTE(rvrolyk): Not using home only night
+            // NOTE(rvrolyk): Not using home only night for HSM but Alarm is always Home
 			sendLocationEvent(name: "hsmSetArm", value: "armNight"); ifDebug("sendLocationEvent(name:\"hsmSetArm\", value:\"armNight\")")
 		}
 	}
@@ -1288,7 +1288,7 @@ private systemArmedNight(){
 
 		if (location.hsmStatus != "armedNight")
 		{
-            log.info "systemArmedNight() hsmStatus=$location.hsmStatus  setting hsmSetArm=armHome"
+            log.info "systemArmedNight() hsmStatus=$location.hsmStatus  setting hsmSetArm=armNight"
 			sendLocationEvent(name: "hsmSetArm", value: "armNight"); ifDebug("sendLocationEvent(name:\"hsmSetArm\", value:\"armNight\")")
 		}
 	}
@@ -2234,5 +2234,6 @@ Version: 0.11.0
 *		Error Codes
 *
 */
+
 
 
