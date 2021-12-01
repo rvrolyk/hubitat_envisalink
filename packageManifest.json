@@ -29,7 +29,7 @@
       "namespace": "dwb",
       "location": "https://raw.githubusercontent.com/bdwilson/hubitat_envisalink/master/hubitat_envisalink_connection_driver.groovy",
       "required": true,
-      "version": "0.8.4"
+      "version": "0.8.5"
     }
   ],
   "apps": [
